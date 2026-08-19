@@ -12,7 +12,6 @@ import {
   type ReactNode,
 } from "react";
 import clsx from "clsx";
-import { Button } from "./Button";
 import { Icon } from "./Icon";
 import { inputClasses } from "./Input";
 import { Row, Stack } from "./layout";
@@ -163,9 +162,7 @@ export function Tooltip({
 }) {
   return (
     <RTooltip.Root>
-      <RTooltip.Trigger render={<span className="pouf-tip-anchor" />}>
-        {children}
-      </RTooltip.Trigger>
+      <RTooltip.Trigger>{children}</RTooltip.Trigger>
       <RTooltip.Portal>
         <RTooltip.Content className="pouf-tooltip" sideOffset={8}>
           {tip}
@@ -219,20 +216,18 @@ export function Dialog({
           <Stack gap={4}>
             <div className="pouf-dialog__head">
               <Stack gap={1}>
-                <RDialog.Title render={<div />}>
+                <RDialog.Title>
                   <Heading level={3}>{title}</Heading>
                 </RDialog.Title>
                 {description && (
-                  <RDialog.Description render={<div />}>
+                  <RDialog.Description>
                     <Text size="sm" muted>
                       {description}
                     </Text>
                   </RDialog.Description>
                 )}
               </Stack>
-              <RDialog.Close
-                render={<Button variant="quiet" size="sm" label="Close" />}
-              >
+              <RDialog.Close>
                 <Icon name="close" size="sm" />
               </RDialog.Close>
             </div>
@@ -285,8 +280,6 @@ export function Confirm({
   confirmLabel,
   cancelLabel,
   onConfirm,
-  tone = "orange",
-  loading,
   details,
 }: ConfirmProps) {
   return (
@@ -297,15 +290,13 @@ export function Confirm({
         <RAlert.Overlay className="pouf-overlay" />
         <RAlert.Content className="pouf-dialog">
           <Stack gap={4}>
-            <RAlert.Title render={<div />}>{title}</RAlert.Title>
-            <RAlert.Description render={<div />}>
+            <RAlert.Title>{title}</RAlert.Title>
+            <RAlert.Description>
               <Text muted>{body}</Text>
             </RAlert.Description>
             {details}
             <Row gap={3} justify="end">
-              <RAlert.Cancel render={<Button variant="quiet" size="sm" />}>
-                {cancelLabel}
-              </RAlert.Cancel>
+              <RAlert.Cancel>{cancelLabel}</RAlert.Cancel>
               <RAlert.Action onClick={onConfirm}>{confirmLabel}</RAlert.Action>
             </Row>
           </Stack>
@@ -353,8 +344,6 @@ export function Combobox({
   loading,
   error,
   onOpen,
-  id,
-  describedBy,
   placeholder,
   mono,
   label,
@@ -414,25 +403,7 @@ export function Combobox({
         }
       }}
     >
-      <RPopover.Trigger
-        render={
-          <button
-            type="button"
-            id={id}
-            aria-haspopup="listbox"
-            aria-expanded={open}
-            aria-controls={open ? listboxId : undefined}
-            aria-describedby={describedBy}
-            aria-label={label}
-            className={clsx(
-              inputClasses({ mono }),
-              /* Row's layout, inlined: the trigger borrowed .pouf-row classes,
-               * which no longer exist as CSS rules after layout.tsx migrated. */
-              "flex flex-row items-center flex-wrap min-w-0 gap-[var(--gap,var(--s4))] justify-between",
-            )}
-          />
-        }
-      >
+      <RPopover.Trigger>
         <span className={clsx(!value && "pouf-combobox__placeholder")}>
           {value || placeholder}
         </span>

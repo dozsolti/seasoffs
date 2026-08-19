@@ -1,9 +1,8 @@
 import * as RDialog from "@radix-ui/react-dialog";
 import type { ReactNode } from "react";
-import { Button } from "./Button";
 import { Icon } from "./Icon";
 import { Stack } from "./layout";
-import { Heading, Text } from "./text";
+import { Text } from "./text";
 
 interface SheetProps {
   /** Omit for a fully controlled sheet (open/onOpenChange) with no in-place
@@ -41,18 +40,16 @@ export function Sheet({
           <div className="pouf-sheet-panel">
             <div className="pouf-dialog__head">
               <Stack gap={1}>
-                <RDialog.Title render={<div />}>{title}</RDialog.Title>
+                <RDialog.Title>{title}</RDialog.Title>
                 {description && (
-                  <RDialog.Description render={<div />}>
+                  <RDialog.Description>
                     <Text size="sm" muted>
                       {description}
                     </Text>
                   </RDialog.Description>
                 )}
               </Stack>
-              <RDialog.Close
-                render={<Button variant="quiet" size="sm" label="Close" />}
-              >
+              <RDialog.Close>
                 <Icon name="close" size="sm" />
               </RDialog.Close>
             </div>
