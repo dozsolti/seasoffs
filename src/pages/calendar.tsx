@@ -1,8 +1,10 @@
 import { CalendarBlock } from "@/components/pouf/blocks/calendar";
+import EventDetailsModal from "./components/event-details-modal";
 import { useEventsStore } from "@/data/stores/useEventsStore";
 import { useState } from "react";
 import CreateEventModal from "./components/create-event-modal";
 import { eventsListModel } from "@/data/models/eventList.model";
+import type { Event } from "@/types";
 
 function useCalendarPage() {
   const [showAddEventModal, setShowAddEventModal] = useState(false);
@@ -35,6 +37,9 @@ export function CalendarPage() {
     setShowAddEventModal,
   } = useCalendarPage();
 
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const deleteEvent = useEventsStore((state) => state.deleteEvent);
+
   return (
     <>
       <CalendarBlock
@@ -44,11 +49,23 @@ export function CalendarPage() {
         goToday={goToday}
         prevDay={prevDay}
         onAddEventPressed={() => setShowAddEventModal(true)}
+        onEventPressed={(event) => setSelectedEvent(event)}
       />
       <CreateEventModal
         selectedDate={selectedDate}
         showAddEventModal={showAddEventModal}
         setShowAddEventModal={setShowAddEventModal}
+      />
+      <EventDetailsModal
+        event={selectedEvent}
+        open={Boolean(selectedEvent)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEvent(null);
+        }}
+        onDelete={(event) => {
+          deleteEvent(event);
+          setSelectedEvent(null);
+        }}
       />
     </>
   );

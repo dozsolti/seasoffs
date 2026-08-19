@@ -9,7 +9,7 @@ interface SheetProps {
   /** Omit for a fully controlled sheet (open/onOpenChange) with no in-place
    *  trigger — e.g. opened from a table row click. */
   trigger?: ReactNode;
-  title: string;
+  title: string | ReactNode;
   description?: string;
   children: ReactNode;
   open?: boolean;

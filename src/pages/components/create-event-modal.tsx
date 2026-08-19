@@ -1,6 +1,7 @@
 import { Button } from "@/components/pouf/Button";
 import { Field, Input, Textarea } from "@/components/pouf/Input";
 import { NumberInput } from "@/components/pouf/NumberInput";
+import { Segmented } from "@/components/pouf/Segmented";
 
 import { Sheet } from "@/components/pouf/sheet";
 import { useEventsStore } from "@/data/stores/useEventsStore";
@@ -20,7 +21,7 @@ export default function CreateEventModal({
   const addEvent = useEventsStore((state) => state.addEvent);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState(selectedDate.toISOString().slice(0, 10));
+  const [date, setDate] = useState(selectedDate.toISOString().slice(0, 16));
   const [duration, setDuration] = useState("60");
   const [color, setColor] = useState<Tone>("purple");
   const [error, setError] = useState("");
@@ -28,7 +29,7 @@ export default function CreateEventModal({
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setDate(selectedDate.toISOString().slice(0, 10));
+    setDate(selectedDate.toISOString().slice(0, 16));
     setDuration("60");
     setColor("purple");
     setError("");
@@ -78,19 +79,19 @@ export default function CreateEventModal({
             />
           )}
         </Field>
-        <Field label="Date">
-          {(id, describedBy) => (
-            <Input
-              id={id}
-              type="datetime-local"
-              value={date}
-              onChange={setDate}
-              describedBy={describedBy}
-              required
-            />
-          )}
-        </Field>
         <div className="gap-4 grid grid-cols-2">
+          <Field label="Date">
+            {(id, describedBy) => (
+              <Input
+                id={id}
+                type="datetime-local"
+                value={date}
+                onChange={setDate}
+                describedBy={describedBy}
+                required
+              />
+            )}
+          </Field>
           <Field label="Duration (minutes)">
             {(id, describedBy) => (
               <NumberInput
@@ -101,11 +102,13 @@ export default function CreateEventModal({
                 describedBy={describedBy}
                 step={1}
                 max={24 * 60}
+                tone={color}
               />
             )}
           </Field>
-          <Field label="Color">
-            {(id, describedBy) => (
+
+          {/*<Field label="Color">
+             {(id, describedBy) => (
               <select
                 id={id}
                 value={color}
@@ -121,9 +124,19 @@ export default function CreateEventModal({
                   ),
                 )}
               </select>
-            )}
-          </Field>
+            )
+          </Field>} */}
         </div>
+        <Segmented
+          value={color}
+          onChange={(value: string) => setColor(value as Tone)}
+          options={["purple", "pink", "blue", "mint", "yellow"].map((tone) => ({
+            value: tone,
+            label: "",
+            tone: tone as Tone,
+          }))}
+          label="Color"
+        />
         <Field label="Description">
           {(id, describedBy) => (
             <Textarea
@@ -136,7 +149,9 @@ export default function CreateEventModal({
             />
           )}
         </Field>
-        <Button type="submit">Create event</Button>
+        <Button type="submit" tone={color}>
+          Create event
+        </Button>
       </form>
     </Sheet>
   );

@@ -1,20 +1,20 @@
-import clsx from 'clsx'
-import { type Tone } from './tone'
-import { buttonClasses } from './Button'
+import clsx from "clsx";
+import { type Tone } from "./tone";
+import { buttonClasses } from "./Button";
 
 export interface SegmentedOption<T extends string> {
-  value: T
-  label: string
+  value: T;
+  label: string;
+  tone?: Tone;
 }
 
 interface SegmentedProps<T extends string> {
-  value: T
-  onChange: (value: T) => void
-  options: SegmentedOption<T>[]
+  value: T;
+  onChange: (value: T) => void;
+  options: SegmentedOption<T>[];
   /** Names the group for a screen reader — "Showing", "View". Required: a bare
    *  set of buttons announces no reason for existing. */
-  label: string
-  tone?: Tone
+  label: string;
 }
 
 /** A mutually-exclusive choice: grid vs list, draft vs live, and similar.
@@ -35,25 +35,40 @@ interface SegmentedProps<T extends string> {
  * 'list') end to end — passing an option this control cannot produce is a
  * compile error, not a runtime surprise.
  */
-export function Segmented<T extends string>({ value, onChange, options, label, tone = 'blue' }: SegmentedProps<T>) {
+export function Segmented<T extends string>({
+  value,
+  onChange,
+  options,
+  label,
+}: SegmentedProps<T>) {
   return (
-    <div className="pouf-seg inline-flex gap-(--s2)" role="group" aria-label={label}>
+    <div
+      className="pouf-seg inline-flex gap-(--s2)"
+      role="group"
+      aria-label={label}
+    >
       {options.map((o) => {
-        const on = o.value === value
+        const on = o.value === value;
         return (
           <button
             key={o.value}
             type="button"
-            className={clsx(buttonClasses({ size: 'sm', tone }), /* Pressed IN, not recoloured: depth is the system's word for engaged (SC
-             * 1.4.1 — tone alone vanishes in greyscale). aria-pressed carries it. */
-            'aria-pressed:[transform:translateY(2px)] aria-pressed:cushion-control-active')}
+            className={clsx(
+              buttonClasses({
+                size: "sm",
+                tone: o.tone ?? "blue",
+              }) /* Pressed IN, not recoloured: depth is the system's word for engaged (SC
+               * 1.4.1 — tone alone vanishes in greyscale). aria-pressed carries it. */,
+              "aria-pressed:[transform:translateY(2px)] aria-pressed:cushion-control-active",
+              "aspect-square",
+            )}
             aria-pressed={on}
             onClick={() => onChange(o.value)}
           >
             {o.label}
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

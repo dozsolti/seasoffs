@@ -7,6 +7,7 @@ import { Icon } from "../Icon";
 import type { Event } from "@/types";
 import { fromMinutes, getNowMinutes, formatDuration } from "@/lib/date";
 import { eventModel } from "@/data/models/event.model";
+import type { KeyboardEvent } from "react";
 
 // Bounds for the visible day and the point "now" sits at — wall-clock so the demo always renders the same free slots and now-line.
 const DAY_START = 0 * 60;
@@ -60,39 +61,64 @@ function buildTimeline(
   return items;
 }
 
-function EventRow({ event }: { event: Event }) {
+function EventRow({
+  event,
+  onEventPressed,
+}: {
+  event: Event;
+  onEventPressed?: (event: Event) => void;
+}) {
+  const handleKeyDown = (eventKey: KeyboardEvent<HTMLDivElement>) => {
+    if (eventKey.key === "Enter" || eventKey.key === " ") {
+      eventKey.preventDefault();
+      onEventPressed?.(event);
+    }
+  };
+
   return (
-    <Row gap={3} wrap={false} align="top">
-      <div style={{ width: 42, flex: "none", paddingTop: 4 }}>
-        <Text size="sm" muted num>
-          {event.date.getHours().toString().padStart(2, "0")}:
-          {event.date.getMinutes().toString().padStart(2, "0")}
-        </Text>
-        <Text size="xs" muted truncate>
-          {formatDuration(event.duration)}
-        </Text>
-      </div>
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          borderRadius: 18,
-          padding: "14px 16px",
-          background: `var(--${event.color})`,
-          color: "var(--on-accent)",
-          boxShadow: "var(--pouf-control)",
-        }}
-      >
-        <Row justify="between" wrap={false}>
-          <Stack gap={1}>
-            <Text>{event.title}</Text>
-            <Text size="sm">{"who"}</Text>
-          </Stack>
-          <Spacer />
-          <Icon name="calendar" size="sm" />
-        </Row>
-      </div>
-    </Row>
+    <div
+      onClick={() => onEventPressed?.(event)}
+      onKeyDown={handleKeyDown}
+      role={onEventPressed ? "button" : undefined}
+      tabIndex={onEventPressed ? 0 : undefined}
+      style={{ cursor: onEventPressed ? "pointer" : undefined }}
+    >
+      <Row gap={3} wrap={false} align="top">
+        <div style={{ width: 42, flex: "none", paddingTop: 4 }}>
+          <Text size="sm" muted num>
+            {event.date.getHours().toString().padStart(2, "0")}:
+            {event.date.getMinutes().toString().padStart(2, "0")}
+          </Text>
+          <Text size="xs" muted truncate>
+            {formatDuration(event.duration)}
+          </Text>
+        </div>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            borderRadius: 18,
+            padding: "14px 16px",
+            background: `var(--${event.color})`,
+            color: "var(--on-accent)",
+            boxShadow: "var(--pouf-control)",
+          }}
+        >
+          <Row justify="between" wrap={false}>
+            <Stack gap={1}>
+              <Text size={event.description ? "md" : "lg"}>{event.title}</Text>
+              {event.description ? (
+                <Text size="sm" muted truncate>
+                  {event.description}
+                </Text>
+              ) : null}
+            </Stack>
+            <Spacer />
+            <Icon name="calendar" size="sm" />
+          </Row>
+        </div>
+      </Row>
+    </div>
   );
 }
 
@@ -153,6 +179,7 @@ export function CalendarBlock({
   nextDay,
   prevDay,
   onAddEventPressed,
+  onEventPressed,
 }: {
   selectedDate: Date;
   events: Event[];
@@ -160,6 +187,7 @@ export function CalendarBlock({
   nextDay: () => void;
   prevDay: () => void;
   onAddEventPressed: () => void;
+  onEventPressed?: (event: Event) => void;
 }) {
   const date = selectedDate.toISOString().split("T")[0];
   const dateName = selectedDate.toLocaleDateString(undefined, {
@@ -216,6 +244,7 @@ export function CalendarBlock({
                   <EventRow
                     key={item.event.date.toISOString()}
                     event={item.event}
+                    onEventPressed={onEventPressed}
                   />
                 );
               })}

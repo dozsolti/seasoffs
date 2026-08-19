@@ -1,21 +1,32 @@
-import { cva } from 'class-variance-authority'
-import { inputClasses } from './Input'
-import { useEffect, useRef, type KeyboardEvent, type PointerEvent } from 'react'
-import { Icon } from './Icon'
-import { normalizeOnBlur, sanitizeNumeric, stepValue } from './numberinput-math'
+import { cva, cx } from "class-variance-authority";
+import { inputClasses } from "./Input";
+import {
+  useEffect,
+  useRef,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
+import { Icon } from "./Icon";
+import {
+  normalizeOnBlur,
+  sanitizeNumeric,
+  stepValue,
+} from "./numberinput-math";
+import { toneClass, type Tone } from "./tone";
 
 interface NumberInputProps {
-  value: string
-  onChange: (value: string) => void
-  step?: number
-  min?: number
-  max?: number
-  id?: string
-  describedBy?: string
-  placeholder?: string
-  invalid?: boolean
-  disabled?: boolean
-  label?: string
+  tone: Tone;
+  value: string;
+  onChange: (value: string) => void;
+  step?: number;
+  min?: number;
+  max?: number;
+  id?: string;
+  describedBy?: string;
+  placeholder?: string;
+  invalid?: boolean;
+  disabled?: boolean;
+  label?: string;
 }
 
 /** A spinbutton composite replacing <input type="number">: the native spinner
@@ -32,16 +43,20 @@ interface NumberInputProps {
  * included. Invalid outranks focus-within, matching the original :has() rule's
  * higher specificity. The capsule fades for disabled; the bare input suppresses
  * its own fade so the value doesn't double-blur. */
-const capsule = cva('pouf-numberinput flex items-center gap-1 h-14 px-2 py-0 rounded-pill bg-bg', {
-  variants: {
-    invalid: {
-      false: 'cushion-field focus-within:[box-shadow:var(--pouf-field-focus)]',
-      true: '[box-shadow:var(--pouf-field),inset_0_0_0_3px_var(--orange)]',
+const capsule = cva(
+  "flex items-center gap-1 bg-bg px-2 py-0 rounded-pill h-14 pouf-numberinput",
+  {
+    variants: {
+      invalid: {
+        false:
+          "cushion-field focus-within:[box-shadow:var(--pouf-field-focus)]",
+        true: "[box-shadow:var(--pouf-field),inset_0_0_0_3px_var(--orange)]",
+      },
+      disabled: { true: "opacity-55" },
     },
-    disabled: { true: 'opacity-55' },
+    defaultVariants: { invalid: false },
   },
-  defaultVariants: { invalid: false },
-})
+);
 
 /* A scaled-down control cushion: full --pouf-control's 16px drop would bleed
  * past the capsule and read as smudge, not lift. The mini's 5px floor lip
@@ -49,15 +64,14 @@ const capsule = cva('pouf-numberinput flex items-center gap-1 h-14 px-2 py-0 rou
  * optical trick as the blob's glyph. touch-action: rapid taps must step, not
  * double-tap-zoom. */
 const stepper = [
-  'pouf-numberinput__btn flex-none inline-flex items-center justify-center w-10 h-10 p-0 border-none',
-  'rounded-pill bg-purple text-[var(--on-accent)] cursor-pointer',
-  '[box-shadow:inset_0_-5px_0_rgba(0,0,0,0.12),inset_0_3px_0_rgba(255,255,255,0.4),0_3px_6px_rgba(58,46,92,0.18)]',
-  '[transition:box-shadow_120ms_ease,transform_120ms_ease] [touch-action:manipulation] select-none',
-  '[&_svg]:[transform:translateY(-1px)]',
-  'enabled:active:[transform:translateY(1px)] enabled:active:cushion-control-active',
-  'disabled:cursor-not-allowed disabled:opacity-50 disabled:cushion-control-active disabled:[transform:translateY(1px)]',
-].join(' ')
-
+  "pouf-numberinput__btn flex-none inline-flex items-center justify-center w-10 h-10 p-0 border-none",
+  "rounded-pill bg-[var(--tone,var(--purple))] text-[var(--on-accent)] cursor-pointer",
+  "[box-shadow:inset_0_-5px_0_rgba(0,0,0,0.12),inset_0_3px_0_rgba(255,255,255,0.4),0_3px_6px_rgba(58,46,92,0.18)]",
+  "[transition:box-shadow_120ms_ease,transform_120ms_ease] [touch-action:manipulation] select-none",
+  "[&_svg]:[transform:translateY(-1px)]",
+  "enabled:active:[transform:translateY(1px)] enabled:active:cushion-control-active",
+  "disabled:cursor-not-allowed disabled:opacity-50 disabled:cushion-control-active disabled:[transform:translateY(1px)]",
+].join(" ");
 
 export function NumberInput({
   value,
@@ -66,6 +80,7 @@ export function NumberInput({
   min,
   max,
   id,
+  tone,
   describedBy,
   placeholder,
   invalid,
@@ -74,70 +89,70 @@ export function NumberInput({
 }: NumberInputProps) {
   // Hold-to-repeat reads through a ref: the timer callback outlives the render
   // that armed it, and stepping from a stale value would rubber-band.
-  const latest = useRef({ value, step, min, max, onChange })
-  latest.current = { value, step, min, max, onChange }
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latest = useRef({ value, step, min, max, onChange });
+  latest.current = { value, step, min, max, onChange };
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stop = () => {
     if (timer.current !== null) {
-      clearTimeout(timer.current)
-      timer.current = null
+      clearTimeout(timer.current);
+      timer.current = null;
     }
-  }
-  useEffect(() => stop, [])
+  };
+  useEffect(() => stop, []);
 
   const fire = (dir: 1 | -1) => {
-    const { value, step, min, max, onChange } = latest.current
-    const next = stepValue(value, dir, { step, min, max })
+    const { value, step, min, max, onChange } = latest.current;
+    const next = stepValue(value, dir, { step, min, max });
     // Parked at a bound: stop the repeat rather than tick forever. Once the
     // button disables at the bound it swallows pointer events, so the
     // pointerup that would normally clear this timer never arrives.
     if (next === value) {
-      stop()
-      return
+      stop();
+      return;
     }
-    onChange(next)
-  }
+    onChange(next);
+  };
 
   const press = (dir: 1 | -1) => (e: PointerEvent<HTMLButtonElement>) => {
     // Native spinners never move focus; preventDefault keeps it that way and
     // suppresses long-press selection on touch.
-    e.preventDefault()
-    fire(dir)
+    e.preventDefault();
+    fire(dir);
     const tick = () => {
-      fire(dir)
-      timer.current = setTimeout(tick, 60)
-    }
-    timer.current = setTimeout(tick, 400)
-  }
+      fire(dir);
+      timer.current = setTimeout(tick, 60);
+    };
+    timer.current = setTimeout(tick, 400);
+  };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     const apply = (dir: 1 | -1, mult = 1) => {
-      e.preventDefault()
-      onChange(stepValue(value, dir, { step, min, max, mult }))
+      e.preventDefault();
+      onChange(stepValue(value, dir, { step, min, max, mult }));
+    };
+    if (e.key === "ArrowUp") apply(1);
+    else if (e.key === "ArrowDown") apply(-1);
+    else if (e.key === "PageUp") apply(1, 10);
+    else if (e.key === "PageDown") apply(-1, 10);
+    else if (e.key === "Home" && min !== undefined) {
+      e.preventDefault();
+      onChange(String(min));
+    } else if (e.key === "End" && max !== undefined) {
+      e.preventDefault();
+      onChange(String(max));
     }
-    if (e.key === 'ArrowUp') apply(1)
-    else if (e.key === 'ArrowDown') apply(-1)
-    else if (e.key === 'PageUp') apply(1, 10)
-    else if (e.key === 'PageDown') apply(-1, 10)
-    else if (e.key === 'Home' && min !== undefined) {
-      e.preventDefault()
-      onChange(String(min))
-    } else if (e.key === 'End' && max !== undefined) {
-      e.preventDefault()
-      onChange(String(max))
-    }
-  }
+  };
 
-  const parsed = Number.parseFloat(value)
-  const atMin = min !== undefined && Number.isFinite(parsed) && parsed <= min
-  const atMax = max !== undefined && Number.isFinite(parsed) && parsed >= max
+  const parsed = Number.parseFloat(value);
+  const atMin = min !== undefined && Number.isFinite(parsed) && parsed <= min;
+  const atMax = max !== undefined && Number.isFinite(parsed) && parsed >= max;
 
   return (
     <div className={capsule({ invalid: !!invalid, disabled: !!disabled })}>
       <button
         type="button"
-        className={stepper}
+        className={cx(stepper, toneClass(tone))}
         aria-label="Decrease"
         tabIndex={-1}
         disabled={disabled || atMin}
@@ -164,7 +179,7 @@ export function NumberInput({
       />
       <button
         type="button"
-        className={stepper}
+        className={`${stepper} ${toneClass(tone)}`}
         aria-label="Increase"
         tabIndex={-1}
         disabled={disabled || atMax}
@@ -176,5 +191,5 @@ export function NumberInput({
         <Icon name="add" />
       </button>
     </div>
-  )
+  );
 }

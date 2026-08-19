@@ -58,7 +58,7 @@ export function Eyebrow({ children }: { children: ReactNode }) {
 
 interface TextProps {
   children: ReactNode;
-  size?: "xs" | "sm" | "md";
+  size?: "xs" | "sm" | "md" | "lg";
   muted?: boolean;
   /** Tabular numerals — use for any figure in a column that must align. */
   num?: boolean;
@@ -68,7 +68,12 @@ interface TextProps {
 
 const text = cva("font-bold pouf-text [overflow-wrap:anywhere]", {
   variants: {
-    size: { md: "text-[15px]", sm: "text-[13px]", xs: "text-[10px]" },
+    size: {
+      lg: "text-[17px]",
+      md: "text-[15px]",
+      sm: "text-[13px]",
+      xs: "text-[10px]",
+    },
     muted: { true: "text-muted" },
     num: {
       true: '[font-variant-numeric:tabular-nums] [font-feature-settings:"tnum"]',

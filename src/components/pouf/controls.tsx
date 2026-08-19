@@ -297,9 +297,7 @@ export function Confirm({
         <RAlert.Overlay className="pouf-overlay" />
         <RAlert.Content className="pouf-dialog">
           <Stack gap={4}>
-            <RAlert.Title render={<div />}>
-              <Heading level={3}>{title}</Heading>
-            </RAlert.Title>
+            <RAlert.Title render={<div />}>{title}</RAlert.Title>
             <RAlert.Description render={<div />}>
               <Text muted>{body}</Text>
             </RAlert.Description>
@@ -308,18 +306,7 @@ export function Confirm({
               <RAlert.Cancel render={<Button variant="quiet" size="sm" />}>
                 {cancelLabel}
               </RAlert.Cancel>
-              <RAlert.Action
-                render={
-                  <Button
-                    tone={tone}
-                    size="sm"
-                    onClick={onConfirm}
-                    loading={loading}
-                  />
-                }
-              >
-                {confirmLabel}
-              </RAlert.Action>
+              <RAlert.Action onClick={onConfirm}>{confirmLabel}</RAlert.Action>
             </Row>
           </Stack>
         </RAlert.Content>
